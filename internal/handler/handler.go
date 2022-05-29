@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/TimothyYe/godns/internal/handler/alidns"
 	"github.com/TimothyYe/godns/internal/handler/cloudflare"
+	"github.com/TimothyYe/godns/internal/handler/dinahosting"
 	"github.com/TimothyYe/godns/internal/handler/dnspod"
 	"github.com/TimothyYe/godns/internal/handler/dreamhost"
 	"github.com/TimothyYe/godns/internal/handler/duck"
@@ -29,6 +30,8 @@ func CreateHandler(provider string) IHandler {
 	switch provider {
 	case utils.CLOUDFLARE:
 		handler = IHandler(&cloudflare.Handler{})
+	case utils.DINAHOSTING:
+		handler = IHandler(&dinahosting.Handler{})
 	case utils.DNSPOD:
 		handler = IHandler(&dnspod.Handler{})
 	case utils.DREAMHOST:

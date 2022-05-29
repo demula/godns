@@ -41,6 +41,8 @@ const (
 	// PanicMax is the max allowed panic times
 	PanicMax = 5
 	// DNSPOD for dnspod.cn
+	DINAHOSTING = "Dinahosting"
+	// DNSPOD for dnspod.cn
 	DNSPOD = "DNSPod"
 	// HE for he.net
 	HE = "HE"
