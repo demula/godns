@@ -265,6 +265,13 @@ func CheckSettings(config *settings.Settings) error {
 		if config.LoginToken == "" {
 			return errors.New("login token cannot be empty")
 		}
+	case DINAHOSTING:
+		if config.Email == "" {
+			return errors.New("email cannot be empty")
+		}
+		if config.Password == "" {
+			return errors.New("password cannot be empty")
+		}
 
 	default:
 		message := fmt.Sprintf("'%s' is not a supported DNS provider", config.Provider)
