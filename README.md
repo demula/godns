@@ -47,6 +47,7 @@ Currently supports updating A records for subdomains. Doesn't support updating o
     - [HE.net](#henet)
     - [Scaleway](#scaleway)
     - [Linode](#linode)
+    - [Dinahosting](#dinahosting)
   - [Notifications](#notifications)
     - [Email](#email)
     - [Telegram](#telegram)
@@ -84,6 +85,7 @@ Currently supports updating A records for subdomains. Doesn't support updating o
 | [No-IP][no-ip]                        | :white_check_mark: | :white_check_mark: |        :x:         | :white_check_mark: |
 | [Scaleway][Scaleway]                  | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | [Linode][linode]                      | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| [Dinahosting][dinahosting]                      | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: |
 
 [cloudflare]: https://cloudflare.com
 [google.domains]: https://domains.google
@@ -96,6 +98,7 @@ Currently supports updating A records for subdomains. Doesn't support updating o
 [no-ip]: https://www.noip.com
 [Scaleway]: https://www.scaleway.com/
 [Linode]: https://www.linode.com
+[Dinashosting]: https://dinahosting.com
 
 Tip: You can follow this [issue](https://github.com/TimothyYe/godns/issues/76) to view the current status of DDNS for root domains.
 
@@ -542,6 +545,35 @@ The GoDNS Linode handler currently uses a fixed TTL of 30 seconds for Linode DNS
   "ip_url": "https://api.ip.sb/ip",
   "ip_type": "IPv4",
   "interval": 300
+}
+```
+</details>
+
+#### Dinahosting
+
+For Dinahosting, you need to provide the email & password of your account in order to use their API.
+
+<details>
+<summary>Using email & password</summary>
+
+```json
+{
+  "provider": "Dinahosting",
+  "email": "you@example.com",
+  "password": "Global API Key",
+  "domains": [{
+      "domain_name": "example.com",
+      "sub_domains": ["www","@"]
+    },{
+      "domain_name": "example2.com",
+      "sub_domains": ["www","test"]
+    }
+  ],
+  "resolver": "8.8.8.8",
+  "ip_url": "https://api.ip.sb/ip",
+  "ip_type": "IPv4",
+  "interval": 300,
+  "socks5_proxy": ""
 }
 ```
 </details>
