@@ -1,9 +1,11 @@
 package dinahosting
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -17,7 +19,7 @@ import (
 
 var (
 	// DinahostingUrl the API address for NoIP
-	DinahostingUrl = "https://dinahosting.com/special/api.php?AUTH_USER=%s&AUTH_PWD=%s&domain=%s&hostname=%s&ip=%s&oldIp=%s&command=Domain_Zone_UpdateTypeA"
+	DinahostingUrl = "https://dinahosting.com/special/api.php?command=Domain_Zone_UpdateTypeA&domain=%s&hostname=%s&ip=%s&responseType=Json"
 )
 
 // Handler struct
@@ -59,13 +61,6 @@ func (handler *Handler) DomainLoop(domain *settings.Domain, panicChan chan<- set
 		log.Debug("currentIP is:", currentIP)
 		client := utils.GetHttpClient(handler.Configuration, handler.Configuration.UseProxy)
 
-		var ip string
-		if strings.ToUpper(handler.Configuration.IPType) == utils.IPV4 {
-			ip = fmt.Sprintf("myip=%s", currentIP)
-		} else if strings.ToUpper(handler.Configuration.IPType) == utils.IPV6 {
-			ip = fmt.Sprintf("myipv6=%s", currentIP)
-		}
-
 		for _, subDomain := range domain.SubDomains {
 			hostname := subDomain + "." + domain.DomainName
 			lastIP, err := utils.ResolveDNS(hostname, handler.Configuration.Resolver, handler.Configuration.IPType)
@@ -78,16 +73,25 @@ func (handler *Handler) DomainLoop(domain *settings.Domain, panicChan chan<- set
 			if currentIP == lastIP {
 				log.Infof("IP is the same as cached one (%s). Skip update.", currentIP)
 			} else {
-				req, _ := http.NewRequest("GET", fmt.Sprintf(
+				u := fmt.Sprintf(
 					DinahostingUrl,
-					handler.Configuration.Email,
-					handler.Configuration.Password,
-					hostname,
-					ip), nil)
+					url.QueryEscape(domain.DomainName),
+					url.QueryEscape(subDomain),
+					url.QueryEscape(currentIP))
+				req, err := http.NewRequest("POST", u, nil)
+				if err != nil {
+					log.Error("Failed to update sub domain:", subDomain)
+					continue
+				}
 
+				req.Header.Add("Content-Type", "application/json")
 				if handler.Configuration.UserAgent != "" {
 					req.Header.Add("User-Agent", handler.Configuration.UserAgent)
 				}
+
+				// add basic auth
+				auth := base64.StdEncoding.EncodeToString([]byte(handler.Configuration.Email + ":" + handler.Configuration.Password))
+				req.Header.Add("Authorization", "Basic "+auth)
 
 				// update IP with HTTP GET request
 				resp, err := client.Do(req)
@@ -100,8 +104,10 @@ func (handler *Handler) DomainLoop(domain *settings.Domain, panicChan chan<- set
 				defer resp.Body.Close()
 
 				body, err := ioutil.ReadAll(resp.Body)
-				if err != nil || !strings.Contains(string(body), "\"responseCode\":1000") {
-					log.Error("Failed to update the IP", err)
+				if err != nil || !strings.Contains(string(body), `"responseCode":1000`) {
+					log.Error(resp.Status)
+					log.Error(string(body))
+					log.Error("Failed to update the IP. ", err)
 					continue
 				} else {
 					log.Infof("IP updated to: %s", currentIP)
