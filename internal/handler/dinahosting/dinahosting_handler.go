@@ -100,7 +100,7 @@ func (handler *Handler) DomainLoop(domain *settings.Domain, panicChan chan<- set
 				defer resp.Body.Close()
 
 				body, err := ioutil.ReadAll(resp.Body)
-				if err != nil || !strings.Contains(string(body), "good") {
+				if err != nil || !strings.Contains(string(body), "\"responseCode\":1000") {
 					log.Error("Failed to update the IP", err)
 					continue
 				} else {
