@@ -70,9 +70,11 @@ func (handler *Handler) DomainLoop(domain *settings.Domain, panicChan chan<- set
 			}
 
 			//check against currently known IP, if no change, skip update
+			log.Debug("lastIP is:", lastIP)
 			if currentIP == lastIP {
 				log.Infof("IP is the same as cached one (%s). Skip update.", currentIP)
 			} else {
+				log.Debugf("Updating last ip '%s' with new '%s'", lastIP, currentIP)
 				u := fmt.Sprintf(
 					DinahostingUrl,
 					url.QueryEscape(domain.DomainName),
